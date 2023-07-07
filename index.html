@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat App</title>
+</head>
+
+<body>
+
+    <h1>My Chat</h1>
+    <pre id="messageBox"></pre>
+    <form id="messageForm">
+        <input id="messageInput" placeholder="Write a message...">
+    </form>
+
+
+    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"
+        integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+"
+        crossorigin="anonymous"></script>
+    <script>
+
+        const socket = io('ws://192.168.50.161:8080')
+
+        const username = prompt('Enter your username');
+
+
+        const messageBox = document.getElementById('messageBox');
+        const messageForm = document.getElementById('messageForm');
+        const messageInput = document.getElementById('messageInput');
+
+
+        setTimeout(() => {
+            socket.emit('user joined', username);
+        }, 100)
+
+        messageForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            socket.emit('chat message', {
+                message: messageInput.value,
+                username,
+            });
+            messageBox.append(`[${username}]: ${messageInput.value}\n`)
+            messageInput.value = '';
+        })
+
+        socket.on('new message', (message) => {
+            messageBox.append(`[${message.username}]: ${message.message}\n`);
+        });
+
+        socket.on('new user', (newUser) => {
+            messageBox.append(`[${newUser}] joined to chat\n`);
+        });
+
+    </script>
+</body>
+
+</html>
